@@ -21,7 +21,7 @@ function parseVariableDeclaration(parsedCode, varMap) {
 function parseVariableDeclarator(parsedCode, varMap) {
     let name = evalExpression(parsedCode.id, varMap);
     let value = evalExpression(parsedCode.init, varMap);
-    if(value !== '')
+    if (value !== '')
         varMap[name] = value;
 
     return parsedCode;
@@ -53,8 +53,6 @@ function parseBlockStatement(parsedCode, varMap, inputVector) {
 }
 
 function notLocal(statement) {
-    if (statement.type === 'VariableDeclaration')
-        return false;
     return !(statement.type === 'ExpressionStatement' && statement.expression === undefined);
 
 }

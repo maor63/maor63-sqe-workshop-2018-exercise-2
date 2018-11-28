@@ -95,6 +95,23 @@ describe('The javascript parser', () => {
             `))
         );
     });
+    it('is delete 3 row of local var with assigning 0', () => {
+        assert.equal(
+            substitute_symbols(`
+            function foo(a){
+                let b = 0;
+                let c = 0 + a;
+                let d = c + 0;
+                return d;
+            }
+            `),
+            evalCode(parseCode(`
+            function foo(a){
+                return a;
+            }
+            `))
+        );
+    });
     it('is delete 3 row of local var with while statement', () => {
         assert.equal(
             substitute_symbols(`

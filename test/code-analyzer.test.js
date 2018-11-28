@@ -15,4 +15,12 @@ describe('The javascript parser', () => {
             '{"type":"Program","body":[{"type":"VariableDeclaration","declarations":[{"type":"VariableDeclarator","id":{"type":"Identifier","name":"a"},"init":{"type":"Literal","value":1,"raw":"1"}}],"kind":"let"}],"sourceType":"script"}'
         );
     });
+
+    it('is format function working well', () => {
+        assert.equal(
+            'hello {}'.format(undefined) + '{} fun world'.format('nice'),
+            'hello nice fun world'
+        );
+    });
+
 });

@@ -1,4 +1,3 @@
-
 let evalFunctions = {
     MemberExpression: evalMemberExpression,
     Literal: evalLiteral,
@@ -17,7 +16,7 @@ function isArrayVar(member) {
 function evalMemberExpression(expression, varMap) {
     let member = evalExpression(expression.object, varMap);
     let property = evalExpression(expression.property, varMap);
-    if(isArrayVar(member)) {
+    if (isArrayVar(member)) {
         let array = eval(member);
         return '{}'.format(array[property]);
     }
@@ -53,7 +52,7 @@ function evalBinaryExpression(expression, varMap) {
     let right = evalExpression(expression.right, varMap, true);
     if (right === '0')
         return left;
-    else if(left === '0')
+    else if (left === '0')
         return right;
     if (expression.operator !== '+') {
         left = formatExpressionForBinary(left);
@@ -65,10 +64,10 @@ function evalBinaryExpression(expression, varMap) {
 function parseAssignmentExpression(parsedCode, varMap) {
     let left = evalExpression(parsedCode.left, {});
     let right = evalExpression(parsedCode.right, varMap);
-    if(isArrayVar(left)){
+    if (isArrayVar(left)) {
         let arrayVar = left.split('[')[0];
         let index = left.split('[')[1].split(']')[0];
-        if(arrayVar in varMap) {
+        if (arrayVar in varMap) {
             let array = eval(varMap[arrayVar]);
             array[index] = eval(right);
             left = arrayVar;
@@ -79,7 +78,7 @@ function parseAssignmentExpression(parsedCode, varMap) {
     return '{} {} {}'.format(left, parsedCode.operator, right);
 }
 
-function evalIdentifier(expression, varMap = {}) {
+function evalIdentifier(expression, varMap) {
     if (expression.name in varMap)
         expression.name = varMap[expression.name];
     return expression.name;
