@@ -154,23 +154,6 @@ describe('The javascript parser', () => {
         );
     });
 
-    it('is delete 3 row of local var with if statement and substitute 1 var unsing input vector', () => {
-        assert.equal(
-            substitute_symbols(`
-            function foo(a){
-                let b = a;
-                let c = 0;
-                let d = 0;
-                if(b > 2){}
-            }
-            `, {a: 1}),
-            evalCode(parseCode(`
-            function foo(a){
-            if(1 > 2){}
-            }
-            `))
-        );
-    });
     it('is delete 3 row of local var with if statement and substitute 1 var unsing input vector 3 swaps', () => {
         assert.equal(
             substitute_symbols(`
@@ -270,18 +253,18 @@ describe('The javascript parser', () => {
                 let a = x + 1;
                 let b = a + y;
                 let c = 0;
-                
+
                 if (b < z) {
                     c = c + 5;
                     return x + y + z + c;
-                } 
+                }
             }
             `),
             evalCode(parseCode(`
             function foo(x, y, z){
                 if (x + 1 + y < z) {
                     return x + y + z + 5;
-                } 
+                }
             }
             `))
         );
@@ -294,7 +277,7 @@ describe('The javascript parser', () => {
                 let a = x + 1;
                 let b = a + y;
                 let c = 0;
-                
+
                 if (b < z) {
                     c = c + 5;
                     return x + y + z + c;
@@ -318,6 +301,32 @@ describe('The javascript parser', () => {
                 }
             }
 
+            `))
+        );
+    });
+    it('is parse complicated example with while', () => {
+        assert.equal(
+            substitute_symbols(`
+            function foo(x, y, z){
+                let a = x + 1;
+                let b = a + y;
+                let c = 0;
+                while (a < z) {
+                    c = a + b;
+                    z = c * 2;
+                }
+                
+                return z;
+            }
+            `, {x: 'x', y: 'y', z: 'z'}),
+            evalCode(parseCode(`
+            function foo(x, y, z){
+                while (x + 1 < z) {
+                    z = (x + 1 + x + 1 + y) * 2;
+                }
+                
+                return z;
+            }
             `))
         );
     });

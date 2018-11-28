@@ -1,6 +1,5 @@
 import {evalExpression} from './expression-evaluator';
 import {convertStringToParsedCode} from './code-analyzer';
-import $ from 'jquery';
 
 let parseFunctions = {
     BlockStatement: parseBlockStatement,
@@ -27,68 +26,82 @@ function parseVariableDeclarator(parsedCode, varMap) {
     return parsedCode;
 }
 
-function parseExpressionStatement(parsedCode, varMap) {
-    // let index = parsedCode.loc.start.line;
-    // let outputRows = '';
-    // if (inIfStatement)
-    //     outputRows += createTableRow(parsedCode.loc.start.line - 1, 'else statement', '', '', '');
-    parsedCode.expression = convertStringToParsedCode(evalExpression(parsedCode.expression, varMap));
+function parseExpressionStatement(parsedCode, varMap, inputVector) {
+    let codeString = evalExpression(parsedCode.expression, varMap, inputVector);
+    let tokens = codeString.split(' ');
+    if (tokens.length > 1 && tokens[0] in inputVector)
+        parsedCode.expression = convertStringToParsedCode(codeString);
+    else
+        parsedCode.expression = undefined;
     return parsedCode;
 }
 
-function parseFunctionDeclaration(parsedCode, varMap) {
+function parseFunctionDeclaration(parsedCode, varMap, inputVector) {
     // for (let i = 0; i < parsedCode.params.length; i++) {
-    //     parsedCode.params[i] = evalExpression(parsedCode.params[i]);
+    //     let param = evalExpression(parsedCode.params[i]);
+    //     varMap[param] = param;
     // }
-    parsedCode.body = parseStatement(parsedCode.body, varMap);
+    parsedCode.body = parseStatement(parsedCode.body, varMap, inputVector);
     return parsedCode;
 }
 
-function parseBlockStatement(parsedCode, varMap) {
-    let VarMapCopy = JSON.parse(JSON.stringify(varMap));
-    parsedCode.body = parseStatementList(parsedCode.body, VarMapCopy);
+function parseBlockStatement(parsedCode, varMap, inputVector) {
+    let varMapCopy = JSON.parse(JSON.stringify(varMap));
+    parsedCode.body = parseStatementList(parsedCode.body, varMapCopy, inputVector);
+    // console.log('input vector:' + JSON.stringify(inputVector));
+    // for (let v in inputVector) {
+    //     if (v in varMapCopy) {
+    //         varMap[v] = varMapCopy[v];
+    //     }
+    // }
     return parsedCode;
 }
 
 function notLocal(statement) {
-    return statement.type !== 'VariableDeclaration' && statement.type !== 'ExpressionStatement';
-}
-
-function parseStatementList(statementList, varMap) {
-    let filteredStatemets = [];
-    for (let i = 0; i < statementList.length; i++) {
-        statementList[i] = parseStatement(statementList[i], varMap);
-        if (statementList[i] !== null && notLocal(statementList[i]))
-            filteredStatemets.push(statementList[i]);
+    if (statement.type === 'VariableDeclaration')
+        return false;
+    if (statement.type === 'ExpressionStatement' && statement.expression === undefined) {
+        console.log('good expression');
+        return false;
     }
-    return filteredStatemets;
+    return true;
 }
 
-function parseWhileStatement(parsedCode, varMap) {
+function parseStatementList(statementList, varMap, inputVector) {
+    let filteredStatements = [];
+    for (let i = 0; i < statementList.length; i++) {
+        statementList[i] = parseStatement(statementList[i], varMap, inputVector);
+        if (statementList[i] !== null && notLocal(statementList[i]))
+            filteredStatements.push(statementList[i]);
+    }
+    return filteredStatements;
+}
+
+function parseWhileStatement(parsedCode, varMap, inputVector) {
     parsedCode.test = convertStringToParsedCode(evalExpression(parsedCode.test, varMap));
-    parsedCode.body = parseStatement(parsedCode.body, varMap);
+    parsedCode.body = parseStatement(parsedCode.body, varMap, inputVector);
     return parsedCode;
 }
 
-function parseIfStatement(parsedCode, varMap) {
+function parseIfStatement(parsedCode, varMap, inputVector) {
     // let index = parsedCode.loc.start.line;
     let condition = evalExpression(parsedCode.test, varMap, false);
     parsedCode.test = convertStringToParsedCode(condition);
 
     // let outputRows = '';
-    parsedCode.consequent = parseStatement(parsedCode.consequent, varMap);
-    parsedCode.alternate = parseStatement(parsedCode.alternate, varMap);
+    parsedCode.consequent = parseStatement(parsedCode.consequent, varMap, inputVector);
+    parsedCode.alternate = parseStatement(parsedCode.alternate, varMap, inputVector);
     return parsedCode;
 }
 
-function parseReturnStatement(parsedCode, varMap) {
-    parsedCode.argument = convertStringToParsedCode(evalExpression(parsedCode.argument, varMap));
+function parseReturnStatement(parsedCode, varMap, inputVector) {
+    parsedCode.argument = convertStringToParsedCode(evalExpression(parsedCode.argument, varMap, inputVector));
     return parsedCode;
 }
 
-export function parseStatement(parsedCode, varMap) {
+export function parseStatement(parsedCode, varMap, inputVector) {
     if (parsedCode !== null && parsedCode.type in parseFunctions) {
-        parsedCode = parseFunctions[parsedCode.type](parsedCode, varMap);
+        parsedCode = parseFunctions[parsedCode.type](parsedCode, varMap, inputVector);
         return parsedCode;
     }
     else

@@ -49,21 +49,22 @@ function evalBinaryExpression(expression, varMap, inBinaryExpression) {
         return left;
     else if(left === '0')
         return right;
-    if (inBinaryExpression)
-        return '({}{}{})'.format(left, expression.operator, right);
-    else
-        return '{}{}{}'.format(left, expression.operator, right);
+    if (expression.operator !== '+') {
+        if(left.split(' ').length > 1)
+            left = '({})'.format(left);
+        if(right.split(' ').length > 1)
+            right = '({})'.format(right);
+    }
+    return '{} {} {}'.format(left, expression.operator, right);
 }
 
 function parseAssignmentExpression(parsedCode, varMap) {
+
     let left = evalExpression(parsedCode.left, {});
     let right = evalExpression(parsedCode.right, varMap);
+    // console.log("left: " + left + " right: " + right);
     varMap[left] = right;
-    // if (right === '0')
-    //     return left;
-    // else if(left === '0')
-    //     return right;
-    // else
+    // console.log('parse if condition:' + JSON.stringify(varMap));
     return '{} {} {}'.format(left, parsedCode.operator, right);
 }
 
