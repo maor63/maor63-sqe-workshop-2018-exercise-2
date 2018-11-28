@@ -2,43 +2,43 @@
 let evalFunctions = {
     MemberExpression: evalMemberExpression,
     Literal: evalLiteral,
-    CallExpression: evalCallExpression,
     BinaryExpression: evalBinaryExpression,
     Identifier: evalIdentifier,
-    UnaryExpression: evalUnaryExpression,
     LogicalExpression: evalBinaryExpression,
-    UpdateExpression: evalUpdateExpression,
     ArrayExpression: evalArrayExpression,
     AssignmentExpression: parseAssignmentExpression,
 
 };
 
-function evalMemberExpression(expression) {
-    let member = evalExpression(expression.object);
-    let property = evalExpression(expression.property);
-    return member + '[' + property + ']';
+function isArrayVar(member) {
+    return member.indexOf('[') !== -1;
+}
+
+function evalMemberExpression(expression, varMap) {
+    let member = evalExpression(expression.object, varMap);
+    let property = evalExpression(expression.property, varMap);
+    if(isArrayVar(member)) {
+        let array = eval(member);
+        return '{}'.format(array[property]);
+    }
+    else
+        return member + '[' + property + ']';
 }
 
 function evalLiteral(expression) {
     return expression.raw;
 }
 
-function evalElementList(elements) {
+function evalElementList(elements, varMap) {
     let args = [];
     for (let i = 0; i < elements.length; i++) {
-        args.push(evalExpression(elements[i]));
+        args.push(evalExpression(elements[i], varMap));
     }
     return args;
 }
 
-function evalCallExpression(expression) {
-    let callee = evalExpression(expression.callee);
-    let args = evalElementList(expression.arguments);
-    return callee + '({})'.format(args.join(','));
-}
-
-function evalArrayExpression(expression) {
-    let args = evalElementList(expression.elements);
+function evalArrayExpression(expression, varMap) {
+    let args = evalElementList(expression.elements, varMap);
     return '[{}]'.format(args.join(','));
 }
 
@@ -63,34 +63,31 @@ function evalBinaryExpression(expression, varMap) {
 }
 
 function parseAssignmentExpression(parsedCode, varMap) {
-
     let left = evalExpression(parsedCode.left, {});
     let right = evalExpression(parsedCode.right, varMap);
-    // console.log("left: " + left + " right: " + right);
+    if(isArrayVar(left)){
+        let arrayVar = left.split('[')[0];
+        let index = left.split('[')[1].split(']')[0];
+        if(arrayVar in varMap) {
+            let array = eval(varMap[arrayVar]);
+            array[index] = eval(right);
+            left = arrayVar;
+            right = '[{}]'.format(array);
+        }
+    }
     varMap[left] = right;
-    // console.log('parse if condition:' + JSON.stringify(varMap));
     return '{} {} {}'.format(left, parsedCode.operator, right);
 }
 
 function evalIdentifier(expression, varMap = {}) {
-    // console.log('parse if condition:' + JSON.stringify(varMap));
-    if (expression.name in varMap) {
+    if (expression.name in varMap)
         expression.name = varMap[expression.name];
-    }
     return expression.name;
 }
 
-function evalUnaryExpression(expression) {
-    return '{}{}'.format(expression.operator, evalExpression(expression.argument));
-}
-
-function evalUpdateExpression(expression) {
-    return '{}{}'.format(evalExpression(expression.argument), expression.operator);
-}
-
-export function evalExpression(expression, varMap, inBinaryExpression = false) {
+export function evalExpression(expression, varMap) {
     if (expression !== null && expression.type in evalFunctions)
-        return evalFunctions[expression.type](expression, varMap, inBinaryExpression);
+        return evalFunctions[expression.type](expression, varMap);
     else
         return '';
 }

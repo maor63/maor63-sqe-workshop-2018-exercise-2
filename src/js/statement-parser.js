@@ -19,18 +19,22 @@ function parseVariableDeclaration(parsedCode, varMap) {
 }
 
 function parseVariableDeclarator(parsedCode, varMap) {
-    // let index = parsedCode.loc.start.line;
     let name = evalExpression(parsedCode.id, varMap);
     let value = evalExpression(parsedCode.init, varMap);
     if(value !== '')
         varMap[name] = value;
+
     return parsedCode;
 }
 
+function isInputVectorAssignment(tokens, inputVector) {
+    return (tokens[0] in inputVector || tokens[0].split('[')[0] in inputVector);
+}
+
 function parseExpressionStatement(parsedCode, varMap, inputVector) {
-    let codeString = evalExpression(parsedCode.expression, varMap, inputVector);
+    let codeString = evalExpression(parsedCode.expression, varMap);
     let tokens = codeString.split(' ');
-    if (tokens.length > 1 && tokens[0] in inputVector)
+    if (tokens.length > 1 && isInputVectorAssignment(tokens, inputVector))
         parsedCode.expression = convertStringToParsedCode(codeString);
     else
         parsedCode.expression = undefined;
@@ -38,10 +42,6 @@ function parseExpressionStatement(parsedCode, varMap, inputVector) {
 }
 
 function parseFunctionDeclaration(parsedCode, varMap, inputVector) {
-    // for (let i = 0; i < parsedCode.params.length; i++) {
-    //     let param = evalExpression(parsedCode.params[i]);
-    //     varMap[param] = param;
-    // }
     parsedCode.body = parseStatement(parsedCode.body, varMap, inputVector);
     return parsedCode;
 }
@@ -76,17 +76,15 @@ function parseWhileStatement(parsedCode, varMap, inputVector) {
 }
 
 function parseIfStatement(parsedCode, varMap, inputVector) {
-    // let index = parsedCode.loc.start.line;
     let condition = evalExpression(parsedCode.test, varMap, false);
     parsedCode.test = convertStringToParsedCode(condition);
-
-    // let outputRows = '';
     parsedCode.consequent = parseStatement(parsedCode.consequent, varMap, inputVector);
     parsedCode.alternate = parseStatement(parsedCode.alternate, varMap, inputVector);
     return parsedCode;
 }
 
 function parseReturnStatement(parsedCode, varMap, inputVector) {
+
     parsedCode.argument = convertStringToParsedCode(evalExpression(parsedCode.argument, varMap, inputVector));
     return parsedCode;
 }

@@ -316,7 +316,7 @@ describe('The javascript parser', () => {
                     c = a + b;
                     z = c * 2;
                 }
-                
+
                 return z;
             }
             `, {x: 'x', y: 'y', z: 'z'}),
@@ -325,7 +325,7 @@ describe('The javascript parser', () => {
                 while (x + 1 < z) {
                     z = (x + 1 + x + 1 + y) * 2;
                 }
-                
+
                 return z;
             }
             `))
@@ -364,6 +364,75 @@ describe('The javascript parser', () => {
             evalCode(parseCode(`
             function foo(x, y, z){
                 return y;
+            }
+            `))
+        );
+    });
+
+    it('is parse array variable', () => {
+        assert.equal(
+            substitute_symbols(`
+            function foo(x, y, z){
+                let a = [2,3,4];
+
+                return a[1];
+            }
+            `, {x: 'x', y: 'y', z: 'z'}),
+            evalCode(parseCode(`
+            function foo(x, y, z){
+                return 3;
+            }
+            `))
+        );
+    });
+
+    it('is parse array variable with assignment', () => {
+        assert.equal(
+            substitute_symbols(`
+            function foo(x, y, z){
+                let a = [2,3,4];
+                a[1] = 2;
+                return a[1];
+            }
+            `, {x: 'x', y: 'y', z: 'z'}),
+            evalCode(parseCode(`
+            function foo(x, y, z){
+                return 2;
+            }
+            `))
+        );
+    });
+
+    it('is parse array input variable', () => {
+        assert.equal(
+            substitute_symbols(`
+            function foo(x, y, z){
+                let a = [2,3,4];
+                a[1] = 2;
+                return x[1];
+            }
+            `, {x: ['x'], y: 'y', z: 'z'}),
+            evalCode(parseCode(`
+            function foo(x, y, z){
+                return x[1];
+            }
+            `))
+        );
+    });
+
+    it('is parse array input variable with assignment', () => {
+        assert.equal(
+            substitute_symbols(`
+            function foo(x, y, z){
+                let a = [2,3,4];
+                x[1] = 2;
+                return x[1];
+            }
+            `, {x: ['x'], y: 'y', z: 'z'}),
+            evalCode(parseCode(`
+            function foo(x, y, z){
+                x[1] = 2;
+                return x[1];
             }
             `))
         );
