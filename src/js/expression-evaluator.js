@@ -42,7 +42,13 @@ function evalArrayExpression(expression) {
     return '[{}]'.format(args.join(','));
 }
 
-function evalBinaryExpression(expression, varMap, inBinaryExpression) {
+function formatExpressionForBinary(expression) {
+    if (expression.split(' ').length > 1)
+        expression = '({})'.format(expression);
+    return expression;
+}
+
+function evalBinaryExpression(expression, varMap) {
     let left = evalExpression(expression.left, varMap, true);
     let right = evalExpression(expression.right, varMap, true);
     if (right === '0')
@@ -50,10 +56,8 @@ function evalBinaryExpression(expression, varMap, inBinaryExpression) {
     else if(left === '0')
         return right;
     if (expression.operator !== '+') {
-        if(left.split(' ').length > 1)
-            left = '({})'.format(left);
-        if(right.split(' ').length > 1)
-            right = '({})'.format(right);
+        left = formatExpressionForBinary(left);
+        right = formatExpressionForBinary(right);
     }
     return '{} {} {}'.format(left, expression.operator, right);
 }

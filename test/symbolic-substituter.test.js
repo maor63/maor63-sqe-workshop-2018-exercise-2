@@ -331,4 +331,41 @@ describe('The javascript parser', () => {
             `))
         );
     });
+
+    it('is parse define local var with the same name as input vector', () => {
+        assert.equal(
+            substitute_symbols(`
+            function foo(x, y, z){
+                let a = x + 1;
+                let b = a + y;
+                let c = 0;
+                let z = 3;
+                return z;
+            }
+            `, {x: 'x', y: 'y', z: 'z'}),
+            evalCode(parseCode(`
+            function foo(x, y, z){
+                return 3;
+            }
+            `))
+        );
+    });
+    it('is parse override variable', () => {
+        assert.equal(
+            substitute_symbols(`
+            function foo(x, y, z){
+                let a = x + 1;
+                let b = a + y;
+                let c = 0;
+                a = y;
+                return a;
+            }
+            `, {x: 'x', y: 'y', z: 'z'}),
+            evalCode(parseCode(`
+            function foo(x, y, z){
+                return y;
+            }
+            `))
+        );
+    });
 });

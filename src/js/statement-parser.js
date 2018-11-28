@@ -49,23 +49,14 @@ function parseFunctionDeclaration(parsedCode, varMap, inputVector) {
 function parseBlockStatement(parsedCode, varMap, inputVector) {
     let varMapCopy = JSON.parse(JSON.stringify(varMap));
     parsedCode.body = parseStatementList(parsedCode.body, varMapCopy, inputVector);
-    // console.log('input vector:' + JSON.stringify(inputVector));
-    // for (let v in inputVector) {
-    //     if (v in varMapCopy) {
-    //         varMap[v] = varMapCopy[v];
-    //     }
-    // }
     return parsedCode;
 }
 
 function notLocal(statement) {
     if (statement.type === 'VariableDeclaration')
         return false;
-    if (statement.type === 'ExpressionStatement' && statement.expression === undefined) {
-        console.log('good expression');
-        return false;
-    }
-    return true;
+    return !(statement.type === 'ExpressionStatement' && statement.expression === undefined);
+
 }
 
 function parseStatementList(statementList, varMap, inputVector) {
