@@ -1,5 +1,6 @@
 import {evalExpression} from './expression-evaluator';
 import {convertStringToParsedCode} from './code-analyzer';
+import $ from 'jquery';
 
 let parseFunctions = {
     BlockStatement: parseBlockStatement,
@@ -11,8 +12,6 @@ let parseFunctions = {
     WhileStatement: parseWhileStatement,
     IfStatement: parseIfStatement,
     ReturnStatement: parseReturnStatement,
-    BreakStatement: parseBreakStatement,
-    ContinueStatement: parseContinueStatement,
 };
 
 function parseVariableDeclaration(parsedCode, varMap) {
@@ -22,18 +21,19 @@ function parseVariableDeclaration(parsedCode, varMap) {
 
 function parseVariableDeclarator(parsedCode, varMap) {
     // let index = parsedCode.loc.start.line;
-    let name = evalExpression(parsedCode.id);
-    let value = evalExpression(parsedCode.init);
+    let name = evalExpression(parsedCode.id, varMap);
+    let value = evalExpression(parsedCode.init, varMap);
     varMap[name] = value;
     return parsedCode;
 }
 
-function parseExpressionStatement(parsedCode, inIfStatement) {
-    let index = parsedCode.loc.start.line;
-    let outputRows = '';
-    if (inIfStatement)
-        outputRows += createTableRow(parsedCode.loc.start.line - 1, 'else statement', '', '', '');
-    return outputRows + createTableRow(index, convertTypeToName(parsedCode.expression.type), '', '', evalExpression(parsedCode.expression));
+function parseExpressionStatement(parsedCode, varMap) {
+    // let index = parsedCode.loc.start.line;
+    // let outputRows = '';
+    // if (inIfStatement)
+    //     outputRows += createTableRow(parsedCode.loc.start.line - 1, 'else statement', '', '', '');
+    parsedCode.expression = convertStringToParsedCode(evalExpression(parsedCode.expression, varMap));
+    return parsedCode;
 }
 
 function parseFunctionDeclaration(parsedCode, varMap) {
@@ -45,30 +45,28 @@ function parseFunctionDeclaration(parsedCode, varMap) {
 }
 
 function parseBlockStatement(parsedCode, varMap) {
-    parsedCode.body = parseStatementList(parsedCode.body, varMap);
+    let VarMapCopy = JSON.parse(JSON.stringify(varMap));
+    parsedCode.body = parseStatementList(parsedCode.body, VarMapCopy);
     return parsedCode;
+}
+
+function notLocal(statement) {
+    return statement.type !== 'VariableDeclaration' && statement.type !== 'ExpressionStatement';
 }
 
 function parseStatementList(statementList, varMap) {
     let filteredStatemets = [];
     for (let i = 0; i < statementList.length; i++) {
         statementList[i] = parseStatement(statementList[i], varMap);
-        if (statementList[i] !== null && statementList[i].type !== 'VariableDeclaration')
+        if (statementList[i] !== null && notLocal(statementList[i]))
             filteredStatemets.push(statementList[i]);
     }
     return filteredStatemets;
 }
 
-function baseLoopParse(parsedCode, varMap) {
-    // let index = parsedCode.loc.start.line;
-    // let outputRows = createTableRow(index, convertTypeToName(parsedCode.type), '', condition, '');
-    parsedCode.body = parseStatement(parsedCode.body, varMap);
-    return parsedCode;
-}
-
 function parseWhileStatement(parsedCode, varMap) {
-    // parsedCode.test = evalExpression(parsedCode.test, varMap);
-    parsedCode = baseLoopParse(parsedCode, varMap);
+    parsedCode.test = convertStringToParsedCode(evalExpression(parsedCode.test, varMap));
+    parsedCode.body = parseStatement(parsedCode.body, varMap);
     return parsedCode;
 }
 
@@ -76,16 +74,15 @@ function parseIfStatement(parsedCode, varMap) {
     // let index = parsedCode.loc.start.line;
     let condition = evalExpression(parsedCode.test, varMap, false);
     parsedCode.test = convertStringToParsedCode(condition);
-    console.log('parse if condition:' + condition);
+
     // let outputRows = '';
     parsedCode.consequent = parseStatement(parsedCode.consequent, varMap);
     parsedCode.alternate = parseStatement(parsedCode.alternate, varMap);
     return parsedCode;
 }
 
-function parseReturnStatement(parsedCode) {
-    // let index = parsedCode.loc.start.line;
-    // let value = evalExpression(parsedCode.argument);
+function parseReturnStatement(parsedCode, varMap) {
+    parsedCode.argument = convertStringToParsedCode(evalExpression(parsedCode.argument, varMap));
     return parsedCode;
 }
 
@@ -96,14 +93,4 @@ export function parseStatement(parsedCode, varMap) {
     }
     else
         return parsedCode;
-}
-
-function parseBreakStatement(parsedCode) {
-    // let index = parsedCode.loc.start.line;
-    return parsedCode;
-}
-
-function parseContinueStatement(parsedCode) {
-    let index = parsedCode.loc.start.line;
-    return createTableRow(index, 'continue statement', '', '', '');
 }
