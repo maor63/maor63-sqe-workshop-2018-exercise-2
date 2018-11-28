@@ -22,7 +22,8 @@ function parseVariableDeclarator(parsedCode, varMap) {
     // let index = parsedCode.loc.start.line;
     let name = evalExpression(parsedCode.id, varMap);
     let value = evalExpression(parsedCode.init, varMap);
-    varMap[name] = value;
+    if(value !== '')
+        varMap[name] = value;
     return parsedCode;
 }
 

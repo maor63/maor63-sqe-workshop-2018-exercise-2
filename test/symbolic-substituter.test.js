@@ -34,7 +34,7 @@ describe('The javascript parser', () => {
             function foo(a){
                 let b = 0;
                 let c = 0;
-                let d = 0;
+                let d;
             }
             `),
             evalCode(parseCode(`
@@ -311,6 +311,7 @@ describe('The javascript parser', () => {
                 let a = x + 1;
                 let b = a + y;
                 let c = 0;
+                let z;
                 while (a < z) {
                     c = a + b;
                     z = c * 2;
