@@ -41,14 +41,14 @@ function parseExpressionStatement(parsedCode, varMap, inputVector) {
     return parsedCode;
 }
 
-function parseFunctionDeclaration(parsedCode, varMap, inputVector, evaluatedConditions, preIfConditions) {
-    parsedCode.body = substituteStatement(parsedCode.body, varMap, inputVector, evaluatedConditions, preIfConditions);
+function parseFunctionDeclaration(parsedCode, varMap, inputVector, evaluatedConditions) {
+    parsedCode.body = substituteStatement(parsedCode.body, varMap, inputVector, evaluatedConditions);
     return parsedCode;
 }
 
-function parseBlockStatement(parsedCode, varMap, inputVector, evaluatedConditions, preIfConditions) {
+function parseBlockStatement(parsedCode, varMap, inputVector, evaluatedConditions) {
     let varMapCopy = JSON.parse(JSON.stringify(varMap));
-    parsedCode.body = parseStatementList(parsedCode.body, varMapCopy, inputVector, evaluatedConditions, preIfConditions);
+    parsedCode.body = parseStatementList(parsedCode.body, varMapCopy, inputVector, evaluatedConditions);
     return parsedCode;
 }
 
@@ -57,10 +57,10 @@ function notLocal(statement) {
 
 }
 
-function parseStatementList(statementList, varMap, inputVector, evaluatedConditions, preIfConditions) {
+function parseStatementList(statementList, varMap, inputVector, evaluatedConditions) {
     let filteredStatements = [];
     for (let i = 0; i < statementList.length; i++) {
-        statementList[i] = substituteStatement(statementList[i], varMap, inputVector, evaluatedConditions, preIfConditions);
+        statementList[i] = substituteStatement(statementList[i], varMap, inputVector, evaluatedConditions);
         if (statementList[i] !== null && notLocal(statementList[i]))
             filteredStatements.push(statementList[i]);
     }

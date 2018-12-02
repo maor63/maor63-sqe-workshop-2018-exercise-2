@@ -12,13 +12,12 @@ function substitute_symbols(inputCode, inputVector = {}) {
 export function evaluate_code_conditions(inputCode, inputVector = {}) {
     let parsed = parseCode(inputCode);
     let conditions = [];
-    substituteStatement(parsed, {}, inputVector, conditions);
+    let varMap = {};
+    substituteStatement(parsed, varMap, inputVector, conditions);
     let res = [];
-    // console.log('input vector'+ JSON.stringify(inputVector));
-    for(let i =0; i < conditions.length; i++){
-        // console.log(conditions[i][0]);
-        console.log(evalExpression(convertStringToParsedCode(conditions[i][0]), inputVector));
-        let conditionString = evalExpression(convertStringToParsedCode(conditions[i][0]), inputVector);
+    for(let i = 0; i < conditions.length; i++){
+        let inputAndGlobalMap = Object.assign(inputVector, varMap);
+        let conditionString = evalExpression(convertStringToParsedCode(conditions[i][0]), inputAndGlobalMap);
         res.push([eval(conditionString), conditions[i][1]]);
     }
     return res;

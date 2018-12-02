@@ -94,4 +94,28 @@ describe('The javascript parser', () => {
             JSON.stringify([[false, 2]])
         );
     });
+
+    it('is eval while with with input vector of global var', () => {
+        assert.equal(
+            JSON.stringify(evaluate_code_conditions(
+                `let a = 1;
+                function foo(){
+                    while(a > 2){}
+                }`
+                ,{})),
+            JSON.stringify([[false, 3]])
+        );
+    });
+
+    it('is eval while with with input vector of global array var', () => {
+        assert.equal(
+            JSON.stringify(evaluate_code_conditions(
+                `let a = [1];
+                function foo(){
+                    while(a[0] > 2){}
+                }`
+                ,{})),
+            JSON.stringify([[false, 3]])
+        );
+    });
 });
