@@ -5,7 +5,8 @@ let evalFunctions = {
     Identifier: evalIdentifier,
     LogicalExpression: evalBinaryExpression,
     ArrayExpression: evalArrayExpression,
-    AssignmentExpression: parseAssignmentExpression,
+    AssignmentExpression: evalAssignmentExpression,
+    UnaryExpression: evalUnaryExpression,
 
 };
 
@@ -28,6 +29,10 @@ function evalLiteral(expression) {
     return expression.raw;
 }
 
+function evalUnaryExpression(expression, varMap) {
+    return '{}({})'.format(expression.operator, evalExpression(expression.argument, varMap));
+}
+
 function evalElementList(elements, varMap) {
     let args = [];
     for (let i = 0; i < elements.length; i++) {
@@ -48,20 +53,20 @@ function formatExpressionForBinary(expression) {
 }
 
 function evalBinaryExpression(expression, varMap) {
-    let left = evalExpression(expression.left, varMap, true);
-    let right = evalExpression(expression.right, varMap, true);
+    let left = evalExpression(expression.left, varMap);
+    let right = evalExpression(expression.right, varMap);
     if (right === '0')
         return left;
     else if (left === '0')
         return right;
-    if (expression.operator !== '+') {
+    if (['*', '/'].includes(expression.operator )) {
         left = formatExpressionForBinary(left);
         right = formatExpressionForBinary(right);
     }
     return '{} {} {}'.format(left, expression.operator, right);
 }
 
-function parseAssignmentExpression(parsedCode, varMap) {
+function evalAssignmentExpression(parsedCode, varMap) {
     let left = evalExpression(parsedCode.left, {});
     let right = evalExpression(parsedCode.right, varMap);
     if (isArrayVar(left)) {

@@ -13,8 +13,8 @@ let parseFunctions = {
     ReturnStatement: parseReturnStatement,
 };
 
-function parseVariableDeclaration(parsedCode, varMap) {
-    parsedCode.declarations = parseStatementList(parsedCode.declarations, varMap);
+function parseVariableDeclaration(parsedCode, varMap, evaluatedConditions) {
+    parsedCode.declarations = parseStatementList(parsedCode.declarations, varMap, evaluatedConditions);
     return null;
 }
 
@@ -41,14 +41,14 @@ function parseExpressionStatement(parsedCode, varMap, inputVector) {
     return parsedCode;
 }
 
-function parseFunctionDeclaration(parsedCode, varMap, inputVector) {
-    parsedCode.body = parseStatement(parsedCode.body, varMap, inputVector);
+function parseFunctionDeclaration(parsedCode, varMap, inputVector, evaluatedConditions, preIfConditions) {
+    parsedCode.body = substituteStatement(parsedCode.body, varMap, inputVector, evaluatedConditions, preIfConditions);
     return parsedCode;
 }
 
-function parseBlockStatement(parsedCode, varMap, inputVector) {
+function parseBlockStatement(parsedCode, varMap, inputVector, evaluatedConditions, preIfConditions) {
     let varMapCopy = JSON.parse(JSON.stringify(varMap));
-    parsedCode.body = parseStatementList(parsedCode.body, varMapCopy, inputVector);
+    parsedCode.body = parseStatementList(parsedCode.body, varMapCopy, inputVector, evaluatedConditions, preIfConditions);
     return parsedCode;
 }
 
@@ -57,27 +57,33 @@ function notLocal(statement) {
 
 }
 
-function parseStatementList(statementList, varMap, inputVector) {
+function parseStatementList(statementList, varMap, inputVector, evaluatedConditions, preIfConditions) {
     let filteredStatements = [];
     for (let i = 0; i < statementList.length; i++) {
-        statementList[i] = parseStatement(statementList[i], varMap, inputVector);
+        statementList[i] = substituteStatement(statementList[i], varMap, inputVector, evaluatedConditions, preIfConditions);
         if (statementList[i] !== null && notLocal(statementList[i]))
             filteredStatements.push(statementList[i]);
     }
     return filteredStatements;
 }
 
-function parseWhileStatement(parsedCode, varMap, inputVector) {
-    parsedCode.test = convertStringToParsedCode(evalExpression(parsedCode.test, varMap));
-    parsedCode.body = parseStatement(parsedCode.body, varMap, inputVector);
+function parseWhileStatement(parsedCode, varMap, inputVector, evaluatedConditions, preIfConditions) {
+    let condition = evalExpression(parsedCode.test, varMap);
+    parsedCode.test = convertStringToParsedCode(condition);
+    evaluatedConditions.push([condition, parsedCode.loc.start.line]);
+    parsedCode.body = substituteStatement(parsedCode.body, varMap, inputVector, evaluatedConditions, preIfConditions);
     return parsedCode;
 }
 
-function parseIfStatement(parsedCode, varMap, inputVector) {
+function parseIfStatement(parsedCode, varMap, inputVector, evaluatedConditions, preIfConditions) {
     let condition = evalExpression(parsedCode.test, varMap, false);
     parsedCode.test = convertStringToParsedCode(condition);
-    parsedCode.consequent = parseStatement(parsedCode.consequent, varMap, inputVector);
-    parsedCode.alternate = parseStatement(parsedCode.alternate, varMap, inputVector);
+    preIfConditions.push(condition);
+    evaluatedConditions.push([condition, parsedCode.loc.start.line]);
+    parsedCode.consequent = substituteStatement(parsedCode.consequent, varMap, inputVector, evaluatedConditions,preIfConditions);
+    parsedCode.alternate = substituteStatement(parsedCode.alternate, varMap, inputVector, evaluatedConditions, preIfConditions);
+    if(parsedCode.alternate && parsedCode.alternate.type !== 'IfStatement')
+        evaluatedConditions.push(['!({})'.format(preIfConditions.join(' && ')), parsedCode.alternate.loc.start.line]);
     return parsedCode;
 }
 
@@ -87,9 +93,9 @@ function parseReturnStatement(parsedCode, varMap, inputVector) {
     return parsedCode;
 }
 
-export function parseStatement(parsedCode, varMap, inputVector) {
+export function substituteStatement(parsedCode, varMap, inputVector, evaluatedConditions = [], preIfConditions = []) {
     if (parsedCode !== null && parsedCode.type in parseFunctions) {
-        parsedCode = parseFunctions[parsedCode.type](parsedCode, varMap, inputVector);
+        parsedCode = parseFunctions[parsedCode.type](parsedCode, varMap, inputVector, evaluatedConditions, preIfConditions);
         return parsedCode;
     }
     else

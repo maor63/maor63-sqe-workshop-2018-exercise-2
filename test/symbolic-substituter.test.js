@@ -283,7 +283,7 @@ describe('The javascript parser', () => {
                     return x + y + z + 5;
                 }
             }
-            `))
+            `,{x: 1, y: 4, z: 2}))
         );
     });
 
@@ -306,7 +306,7 @@ describe('The javascript parser', () => {
                     return x + y + z + c;
                 }
             }
-            `),
+            `,{x: 1, y: 4, z: 2}),
             evalCode(parseCode(`
             function foo(x, y, z){
                 if (x + 1 + y < z) {
@@ -318,7 +318,7 @@ describe('The javascript parser', () => {
                 }
             }
 
-            `))
+            `,{x: 1, y: 4, z: 2}))
         );
     });
     it('is parse complicated example with while', () => {
@@ -336,7 +336,7 @@ describe('The javascript parser', () => {
 
                 return z;
             }
-            `, {x: 'x', y: 'y', z: 'z'}),
+            `, {x: 1, y: 4, z: 2}),
             evalCode(parseCode(`
             function foo(x, y, z){
                 while (x + 1 < z) {
@@ -359,7 +359,7 @@ describe('The javascript parser', () => {
                 let z = 3;
                 return z;
             }
-            `, {x: 'x', y: 'y', z: 'z'}),
+            `, {x: 1, y: 4, z: 2}),
             evalCode(parseCode(`
             function foo(x, y, z){
                 return 3;
@@ -377,7 +377,7 @@ describe('The javascript parser', () => {
                 a = y;
                 return a;
             }
-            `, {x: 'x', y: 'y', z: 'z'}),
+            `, {x: 6, y: 4, z: 2}),
             evalCode(parseCode(`
             function foo(x, y, z){
                 return y;
@@ -394,7 +394,7 @@ describe('The javascript parser', () => {
 
                 return a[1];
             }
-            `, {x: 'x', y: 'y', z: 'z'}),
+            `, {x: 1, y: 4, z: 2}),
             evalCode(parseCode(`
             function foo(x, y, z){
                 return 3;
@@ -411,7 +411,7 @@ describe('The javascript parser', () => {
                 a[1] = 2;
                 return a[1];
             }
-            `, {x: 'x', y: 'y', z: 'z'}),
+            `, {x: 1, y: 7, z: 2}),
             evalCode(parseCode(`
             function foo(x, y, z){
                 return 2;
@@ -428,7 +428,7 @@ describe('The javascript parser', () => {
                 a[1] = 2;
                 return x[1];
             }
-            `, {x: ['x'], y: 'y', z: 'z'}),
+            `, {x: [1], y: 4, z: 2}),
             evalCode(parseCode(`
             function foo(x, y, z){
                 return x[1];
@@ -445,7 +445,7 @@ describe('The javascript parser', () => {
                 x[1] = 2;
                 return x[1];
             }
-            `, {x: ['x'], y: 'y', z: 'z'}),
+            `, {x: [1], y: 4, z: 2}),
             evalCode(parseCode(`
             function foo(x, y, z){
                 x[1] = 2;
