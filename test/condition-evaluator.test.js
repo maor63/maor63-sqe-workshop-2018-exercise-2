@@ -1,6 +1,5 @@
 import assert from 'assert';
-import {evaluate_code_conditions, substitute_symbols} from '../src/js/symbolic-substituter';
-import {evalCode, parseCode} from '../src/js/code-analyzer';
+import {evaluate_code_conditions} from '../src/js/symbolic-substituter';
 
 describe('The condition evaluator tests', () => {
     it('is eval 1 true if condition', () => {

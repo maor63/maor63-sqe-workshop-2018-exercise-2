@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import {substitute_symbols, evaluate_code_conditions,parse_arguments} from './symbolic-substituter';
+import {evaluate_code_conditions, markPredicates, parse_arguments, substitute_symbols} from './symbolic-substituter';
 
 $(document).ready(function () {
     $('#codeSubmissionButton').click(() => {
@@ -9,17 +9,7 @@ $(document).ready(function () {
         let inputVector = parse_arguments(inputArgs);
         let markRows = evaluate_code_conditions(codeToParse, inputVector);
         let parsedCodeLines = parsedCode.split('\n');
-        let markRowIndex = 0;
-        for(let i = 0; i < parsedCodeLines.length; i++){
-            if(parsedCodeLines[i].includes('if') || parsedCodeLines[i].includes('while')|| parsedCodeLines[i].includes('else')){
-                if(markRows[markRowIndex][0]) {
-                    parsedCodeLines[i] = '<mark class="green">{}</mark>'.format(parsedCodeLines[i]);
-                }
-                else
-                    parsedCodeLines[i] = '<mark class="red">{}</mark>'.format(parsedCodeLines[i]);
-                markRowIndex++;
-            }
-        }
+        markPredicates(parsedCodeLines, markRows);
         $('#codeParseResults').html('<div><p>{}</p></div>'.format(parsedCodeLines.join('<p></p>')));
     });
 });
