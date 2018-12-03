@@ -1,7 +1,10 @@
 import assert from 'assert';
-import {parseCode} from '../src/js/code-analyzer';
 
-describe('The javascript parser', () => {
-
-
+describe('The format function tests', () => {
+    it('is format function working well', () => {
+        assert.equal(
+            'hello {}'.format(undefined) + '{} fun world'.format('nice'),
+            'hello nice fun world'
+        );
+    });
 });

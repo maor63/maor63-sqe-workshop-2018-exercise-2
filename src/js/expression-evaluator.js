@@ -47,6 +47,7 @@ function evalArrayExpression(expression, varMap) {
 }
 
 function formatExpressionForBinary(expression) {
+    expression = expression.toString();
     if (expression.split(' ').length > 1)
         expression = '({})'.format(expression);
     return expression;

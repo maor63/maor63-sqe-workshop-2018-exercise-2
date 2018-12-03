@@ -83,7 +83,7 @@ function parseIfStatement(parsedCode, varMap, inputVector, evaluatedConditions, 
     parsedCode.consequent = substituteStatement(parsedCode.consequent, varMap, inputVector, evaluatedConditions,preIfConditions);
     parsedCode.alternate = substituteStatement(parsedCode.alternate, varMap, inputVector, evaluatedConditions, preIfConditions);
     if(parsedCode.alternate && parsedCode.alternate.type !== 'IfStatement')
-        evaluatedConditions.push(['!({})'.format(preIfConditions.join(' && ')), parsedCode.alternate.loc.start.line]);
+        evaluatedConditions.push(['!({})'.format(preIfConditions.join(' || ')), parsedCode.alternate.loc.start.line]);
     return parsedCode;
 }
 

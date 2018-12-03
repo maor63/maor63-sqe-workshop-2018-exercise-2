@@ -454,4 +454,38 @@ describe('The javascript parser', () => {
             `))
         );
     });
+
+    it('is parse very complicated', () => {
+        assert.equal(
+            substitute_symbols(`
+            function foo(x, y, z){
+                let a = x + 1;
+                let b = a + y;
+                let c = 0;
+
+                if (b < z) {
+                    c = c + 5;
+                    return x + y + z + c;
+                } else if (b < z * 2) {
+                    c = c + x + 5;
+                    return x + y + z + c;
+                } else {
+                    c = c + z + 5;
+                    return x + y + z + c;
+                }
+            }
+            `, {x: 1, y: 2, z: 3}),
+            evalCode(parseCode(`
+            function foo(x, y, z){
+                if (x + 1 + y < z) {
+                    return x + y + z + 5;
+                } else if (x + 1 + y < z * 2) {
+                    return x + y + z + x + 5;
+                } else {
+                    return x + y + z + z + 5;
+                }
+            }
+            `))
+        );
+    });
 });
