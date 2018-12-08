@@ -138,7 +138,104 @@ describe('The condition evaluator tests', () => {
                 }
             }
             `, {x: 1, y: 2, z: 3})),
-            JSON.stringify([[false,7],[true,10],[false,13]])
+            JSON.stringify([[false, 7], [true, 10], [false, 13]])
+        );
+    });
+
+    it('is parse very complicated 2', () => {
+        assert.equal(
+            JSON.stringify(evaluate_code_conditions(`
+            function foo(x, y, z){
+                let a = x + 1;
+                let b = a + y;
+                let c = 0;
+                
+                if (b < z) { 
+                    c = c + 5;
+                    return x + y + z + c;
+                } else if (b < z * 2) { 
+                    c = c + x + 5;
+                    return x + y + z + c;
+                } else { 
+                    c = c + z + 5;
+                    return x + y + z + c;
+                }
+            }
+            `, {x: 1, y: 2, z: 6})),
+            JSON.stringify([[true, 7], [false, 10], [false, 13]])
+        );
+    });
+
+    it('is parse very complicated 3', () => {
+        assert.equal(
+            JSON.stringify(evaluate_code_conditions(`
+            function foo(x, y, z){
+                let a = x[2] + 1;
+                let b = a + y;
+                let c = 0;
+                
+                if (b < z) { 
+                    c = c + 5;
+                    return x[2] + y + z + c;
+                } else if (b < z * 2) { 
+                    c = c + x[2] + 5;
+                    return x[2] + y + z + c;
+                } else { 
+                    c = c + z + 5;
+                    return x[2] + y + z + c;
+                }
+            }
+            `, {x: [5, 8, 1, 2], y: 2, z: 6})),
+            JSON.stringify([[true, 7], [false, 10], [false, 13]])
+        );
+    });
+
+    it('is parse very complicated 4', () => {
+        assert.equal(
+            JSON.stringify(evaluate_code_conditions(`
+            function foo(x, y, z){
+                let a = x[2] + 1;
+                let b = a + y;
+                let c = 0;
+                
+                if (b < z) { 
+                    c = c + 5;
+                    return x[2] + y + z + c;
+                } else if (b < z * 2) { 
+                    c = c + x[2] + 5;
+                    return x[2] + y + z + c;
+                } else { 
+                    c = c + z + 5;
+                    return x[2] + y + z + c;
+                }
+                
+                while (a < z) {
+                    c = a + b;
+                    z = c * 2;
+                }
+            }
+            `, {x: [5, 8, 1, 2], y: 2, z: 6})),
+            JSON.stringify([[true, 7], [false, 10], [false, 13], [true, 18]])
+        );
+    });
+    it('is parse very complicated with while', () => {
+        assert.equal(
+            JSON.stringify(evaluate_code_conditions(`
+                    function foo(x, y, z){
+                            let a = x + 1;
+                            let b = a + y;
+                            let c = 0;
+                            
+                            while (a < z) {
+                                c = a + b;
+                                z = c * 2;
+                            }
+                            
+                            return z;
+                        }
+                    
+            `, {x: 1, y: 2, z: 6})),
+            JSON.stringify([[true, 7]])
         );
     });
 });

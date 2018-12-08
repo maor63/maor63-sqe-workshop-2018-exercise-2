@@ -60,7 +60,7 @@ function evalBinaryExpression(expression, varMap) {
         return left;
     else if (left === '0')
         return right;
-    if (['*', '/'].includes(expression.operator )) {
+    if (['*', '/'].includes(expression.operator)) {
         left = formatExpressionForBinary(left);
         right = formatExpressionForBinary(right);
     }
@@ -85,8 +85,12 @@ function evalAssignmentExpression(parsedCode, varMap) {
 }
 
 function evalIdentifier(expression, varMap) {
-    if (expression.name in varMap)
-        expression.name = varMap[expression.name];
+    if (expression.name in varMap) {
+        if (Array.isArray(varMap[expression.name]))
+            expression.name = '[{}]'.format(varMap[expression.name]);
+        else
+            expression.name = varMap[expression.name];
+    }
     return expression.name;
 }
 

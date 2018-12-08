@@ -78,8 +78,16 @@ function parseWhileStatement(parsedCode, varMap, inputVector, evaluatedCondition
 function parseIfStatement(parsedCode, varMap, inputVector, evaluatedConditions, preIfConditions) {
     let condition = evalExpression(parsedCode.test, varMap, false);
     parsedCode.test = convertStringToParsedCode(condition);
+    let preConditions = '';
+    let fullCondition = condition;
+    if(preIfConditions.length > 0) {
+        preConditions = '!({})'.format(preIfConditions.join(' || '));
+        fullCondition = preConditions + ' && ' + condition;
+    }
+
+    console.log(fullCondition);
     preIfConditions.push(condition);
-    evaluatedConditions.push([condition, parsedCode.loc.start.line]);
+    evaluatedConditions.push([fullCondition, parsedCode.loc.start.line]);
     parsedCode.consequent = substituteStatement(parsedCode.consequent, varMap, inputVector, evaluatedConditions,preIfConditions);
     parsedCode.alternate = substituteStatement(parsedCode.alternate, varMap, inputVector, evaluatedConditions, preIfConditions);
     if(parsedCode.alternate && parsedCode.alternate.type !== 'IfStatement')
