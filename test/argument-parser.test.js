@@ -58,10 +58,10 @@ describe('The argument parser tests', () => {
 
     it('mark predicates correctly', () => {
         let codeToParse = `function foo(x, y, z){
-                                if (x + 1 + y < z) {                
+                                if (x + 1 + y < z) {
                                     return x + y + z + 5;
-                                } else if (x + 1 + y < z * 2) {     
-                                    return x + y + z + x + 5; 
+                                } else if (x + 1 + y < z * 2) {
+                                    return x + y + z + x + 5;
                                 } else {
                                     return x + y + z + z + 5;
                                 }
@@ -71,18 +71,16 @@ describe('The argument parser tests', () => {
         let parsedCodeLines = codeToParse.split('\n');
         markPredicates(parsedCodeLines, markRows);
         assert.equal(JSON.stringify(parsedCodeLines),
-            JSON.stringify([
-                'function foo(x, y, z){',
-                '<mark class="red">                                if (x + 1 + y < z) {                </mark>',
+            JSON.stringify(['function foo(x, y, z){',
+                '<mark class="red">                                if (x + 1 + y < z) {</mark>',
                 '                                    return x + y + z + 5;',
-                '<mark class="green">                                } else if (x + 1 + y < z * 2) {     </mark>',
-                '                                    return x + y + z + x + 5; ',
+                '<mark class="green">                                } else if (x + 1 + y < z * 2) {</mark>',
+                '                                    return x + y + z + x + 5;',
                 '<mark class="red">                                } else {</mark>',
                 '                                    return x + y + z + z + 5;',
                 '                                }',
                 '                            }',
-                '                            '
-            ]));
+                '                            ']));
     });
 
     it('is extract function params', () => {

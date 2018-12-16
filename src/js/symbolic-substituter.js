@@ -16,8 +16,9 @@ export function evaluate_code_conditions(inputCode, inputVector = {}) {
     let res = [];
     let inputAndGlobalMap = Object.assign(inputVector, varMap);
     for (let i = 0; i < conditions.length; i++) {
-        let conditionString = evalExpression(convertStringToParsedCode(conditions[i][0]), inputAndGlobalMap);
-        res.push([eval(conditionString), conditions[i][1]]);
+        // console.log(evalExpression(convertStringToParsedCode(conditions[i][0]), inputAndGlobalMap));
+        let evaluation = eval(evalExpression(convertStringToParsedCode(conditions[i][0]), inputAndGlobalMap));
+        res.push([evaluation, conditions[i][1]]);
     }
     return res;
 }
