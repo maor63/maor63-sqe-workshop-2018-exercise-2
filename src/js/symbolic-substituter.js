@@ -23,24 +23,16 @@ export function evaluate_code_conditions(inputCode, inputVector = {}) {
 }
 
 export function parse_arguments(argumentsString) {
-    let inputVector = {};
-    let startArray = argumentsString.indexOf('[');
-    let endOfArg = argumentsString.indexOf(',');
-    while(endOfArg !== -1){
-        if(!(endOfArg < startArray || startArray === -1)){
-            let endArray = argumentsString.indexOf(']', startArray);
-            endOfArg = endArray + 1;
-        }
-        let arg = argumentsString.slice(0, endOfArg).trim();
-        let argParts = arg.split('=');
-        inputVector[argParts[0].trim()] = eval(argParts[1]);
-        argumentsString = argumentsString.slice(endOfArg + 1);
-        startArray = argumentsString.indexOf('[');
-        endOfArg = argumentsString.indexOf(',');
-    }
-    let argParts = argumentsString.split('=');
-    inputVector[argParts[0].trim()] = eval(argParts[1]);
-    return inputVector;
+    return eval('[' + argumentsString + ']');
+}
+
+export function extract_params(code) {
+    let functionStart = code.indexOf('function');
+    let startOfParams = code.indexOf('(', functionStart);
+    let endOfParams = code.indexOf(')', startOfParams);
+    let rawParams = code.slice(startOfParams + 1, endOfParams);
+    rawParams = rawParams.split(' ').join('').split(',').join('","');
+    return eval('["{}"]'.format(rawParams));
 }
 
 function isPredicate(parsedCodeLine) {

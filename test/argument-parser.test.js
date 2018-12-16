@@ -1,5 +1,5 @@
 import assert from 'assert';
-import {parse_arguments, markPredicates, evaluate_code_conditions} from '../src/js/symbolic-substituter';
+import {parse_arguments, markPredicates, evaluate_code_conditions, extract_params} from '../src/js/symbolic-substituter';
 
 describe('The argument parser tests', () => {
     it('is parse empty argument string', () => {
@@ -7,52 +7,52 @@ describe('The argument parser tests', () => {
             JSON.stringify(parse_arguments(
                 ''
             )),
-            JSON.stringify({})
+            JSON.stringify([])
         );
     });
 
     it('is parse int argument', () => {
         assert.equal(
             JSON.stringify(parse_arguments(
-                'x=1'
+                '1'
             )),
-            JSON.stringify({x: 1})
+            JSON.stringify([1])
         );
     });
 
     it('is parse string argument', () => {
         assert.equal(
             JSON.stringify(parse_arguments(
-                'x=\'hi\''
+                '\'hi\''
             )),
-            JSON.stringify({x: 'hi'})
+            JSON.stringify(['hi'])
         );
     });
 
     it('is parse float argument', () => {
         assert.equal(
             JSON.stringify(parse_arguments(
-                'x=0.1'
+                '0.1'
             )),
-            JSON.stringify({x: 0.1})
+            JSON.stringify([0.1])
         );
     });
 
     it('is parse array argument', () => {
         assert.equal(
             JSON.stringify(parse_arguments(
-                'x=[1,3,2]'
+                '[1,3,2]'
             )),
-            JSON.stringify({x: [1, 3, 2]})
+            JSON.stringify([[1, 3, 2]])
         );
     });
 
     it('is parse multiple arguments', () => {
         assert.equal(
             JSON.stringify(parse_arguments(
-                'x=[1,3,2], y=\'hi\', z=0.4'
+                '[1,3,2],\'hi\',0.4'
             )),
-            JSON.stringify({x: [1, 3, 2], y: 'hi', z: 0.4})
+            JSON.stringify([[1, 3, 2], 'hi',0.4])
         );
     });
 
@@ -83,5 +83,23 @@ describe('The argument parser tests', () => {
                 '                            }',
                 '                            '
             ]));
+    });
+
+    it('is extract function params', () => {
+        assert.equal(
+            JSON.stringify(extract_params(
+                'function foo(s){}'
+            )),
+            JSON.stringify(['s'])
+        );
+    });
+
+    it('is extract function params more then 1', () => {
+        assert.equal(
+            JSON.stringify(extract_params(
+                'function foo(s, hi, delta){}'
+            )),
+            JSON.stringify(['s', 'hi', 'delta'])
+        );
     });
 });

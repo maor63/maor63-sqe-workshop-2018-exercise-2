@@ -86,7 +86,10 @@ function evalAssignmentExpression(parsedCode, varMap) {
 
 function evalIdentifier(expression, varMap) {
     if (expression.name in varMap)
-        expression.name = varMap[expression.name];
+        if(Array.isArray(varMap[expression.name]))
+            expression.name = JSON.stringify(varMap[expression.name]);
+        else
+            expression.name =  varMap[expression.name];
     return expression.name;
 }
 

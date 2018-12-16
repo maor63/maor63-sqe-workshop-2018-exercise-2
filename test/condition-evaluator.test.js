@@ -141,5 +141,29 @@ describe('The condition evaluator tests', () => {
             JSON.stringify([[false,7],[true,10],[false,13]])
         );
     });
+
+    it('is parse very complicated with array as param', () => {
+        assert.equal(
+            JSON.stringify(evaluate_code_conditions(`
+            function foo(x, y, z){
+                let a = x + 1;
+                let b = a + y[0];
+                let c = 0;
+                
+                if (b < z) { 
+                    c = c + 5;
+                    return x + y[0] + z + c;
+                } else if (b < z * 2) { 
+                    c = c + x + 5;
+                    return x + y[0] + z + c;
+                } else { 
+                    c = c + z + 5;
+                    return x + y[0] + z + c;
+                }
+            }
+            `, {x: 1, y: [2,1], z: 3})),
+            JSON.stringify([[false,7],[true,10],[false,13]])
+        );
+    });
 });
 
